@@ -5,28 +5,32 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
+import rut.miit.simplemessanger.MainActivity
 import rut.miit.simplemessanger.R
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val ARG_USERNAME = "username"
+private const val ARG_PASSWORD = "password"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [SignInFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class SignInFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+class SignInFragment : Fragment(R.layout.fragment_sign_in) {
+
+    private var username: String? = null
+    private var password: String? = null
+    private lateinit var usernameEditText: EditText
+    private lateinit var passwordEditText: EditText
+
+    private var enteredUsername: String = ""
+    private var enteredPassword: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            username = it.getString(ARG_USERNAME)
+            password = it.getString(ARG_PASSWORD)
         }
     }
 
@@ -38,22 +42,52 @@ class SignInFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_sign_in, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        usernameEditText = view.findViewById(R.id.signInUsernameEditText)
+        passwordEditText = view.findViewById(R.id.signInPasswordEditText)
+
+        username?.let {
+            usernameEditText.setText(it)
+        }
+        password?.let {
+            passwordEditText.setText(it)
+        }
+
+        enteredUsername = usernameEditText.text.toString()
+        enteredPassword = passwordEditText.text.toString()
+
+        usernameEditText.addTextChangedListener {
+            enteredUsername = it.toString()
+        }
+
+        passwordEditText.addTextChangedListener {
+            enteredPassword = it.toString()
+        }
+
+        val signInBtn: Button = view.findViewById(R.id.signInBtn)
+        signInBtn.setOnClickListener {
+
+            if (enteredUsername == "rstm_avzv" && enteredPassword == "1234") {
+                (activity as? MainActivity)?.navigateToHome()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Неправильный логин или пароль",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment SignInFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(username: String, password: String) =
             SignInFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                    putString(ARG_USERNAME, username)
+                    putString(ARG_PASSWORD, password)
                 }
             }
     }
