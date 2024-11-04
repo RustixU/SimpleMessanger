@@ -1,10 +1,15 @@
 package rut.miit.simplemessanger
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import rut.miit.simplemessanger.fragments.HomeFragment
+import rut.miit.simplemessanger.fragments.OnBoardFragment
+import rut.miit.simplemessanger.fragments.SignInFragment
+import rut.miit.simplemessanger.fragments.SignUpFragment
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,5 +21,38 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        Log.d("MainActivity", "created")
+    }
+
+    fun navigateToSignIn() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.mainFragment, SignInFragment())
+            .addToBackStack(null)
+            .commit()
+    }
+
+    fun navigateToSignUp() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.mainFragment, SignUpFragment())
+            .addToBackStack(null)
+            .commit()
+    }
+
+    fun navigateToHome() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.mainFragment, HomeFragment())
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("MainActivity", "resumed")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("MainActivity", "destroyed")
     }
 }

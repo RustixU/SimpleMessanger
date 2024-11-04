@@ -2,4 +2,13 @@
     <string name="app_name">SimpleMessanger</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_user">Добро пожаловать в простой мессенджер</string>
+    <string name="sign_in_btn">Войти</string>
+    <string name="sign_up_text">С возвращением!</string>
+    <string name="username_hint">Введите логин</string>
+    <string name="email_hint">Введите email</string>
+    <string name="registration">Регистрация</string>
+    <string name="password_hint">Введите пароль</string>
+    <string name="sign_up_btn">Зарегестрироваться</string>
+    <string name="username_chat">username</string>
 </resources>
