@@ -22,7 +22,7 @@ class OnBoardFragment : Fragment(R.layout.fragment_on_board) {
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<Button>(R.id.sign_in).setOnClickListener {
-            (activity as? MainActivity)?.navigateToSignIn()
+            (activity as? MainActivity)?.navigateToSignIn(null, null)
         }
 
         view.findViewById<Button>(R.id.sign_up_text).setOnClickListener {

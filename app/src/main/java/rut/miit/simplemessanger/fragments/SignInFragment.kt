@@ -38,7 +38,6 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_sign_in, container, false)
     }
 
@@ -79,16 +78,5 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
                 ).show()
             }
         }
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(username: String, password: String) =
-            SignInFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_USERNAME, username)
-                    putString(ARG_PASSWORD, password)
-                }
-            }
     }
 }
