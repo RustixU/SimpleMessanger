@@ -36,21 +36,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.mainFragment, signInFragment)
+            .replace(R.id.hostFragment, signInFragment)
             .addToBackStack(null)
             .commit()
     }
 
     fun navigateToSignUp() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.mainFragment, SignUpFragment())
+            .replace(R.id.hostFragment, SignUpFragment())
             .addToBackStack(null)
             .commit()
     }
 
     fun navigateToHome() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.mainFragment, HomeFragment())
+            .replace(R.id.hostFragment, HomeFragment())
             .addToBackStack(null)
             .commit()
     }

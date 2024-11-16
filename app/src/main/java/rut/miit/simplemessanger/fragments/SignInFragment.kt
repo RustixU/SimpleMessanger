@@ -1,6 +1,7 @@
 package rut.miit.simplemessanger.fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,13 +10,20 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
+import androidx.navigation.fragment.findNavController
 import rut.miit.simplemessanger.MainActivity
 import rut.miit.simplemessanger.R
+import rut.miit.simplemessanger.databinding.FragmentSignInBinding
+import rut.miit.simplemessanger.databinding.FragmentSignUpBinding
 
 private const val ARG_USERNAME = "username"
 private const val ARG_PASSWORD = "password"
 
 class SignInFragment : Fragment(R.layout.fragment_sign_in) {
+
+    private var _binding: FragmentSignInBinding? = null
+    private val binding: FragmentSignInBinding
+        get() = _binding ?: throw RuntimeException("FragmentSignInBinding == null")
 
     private var username: String? = null
     private var password: String? = null
@@ -37,15 +45,16 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_sign_in, container, false)
+    ): View {
+        _binding = FragmentSignInBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        usernameEditText = view.findViewById(R.id.signInUsernameEditText)
-        passwordEditText = view.findViewById(R.id.signInPasswordEditText)
+        usernameEditText = binding.signInUsernameEditText
+        passwordEditText = binding.signInPasswordEditText
 
         username?.let {
             usernameEditText.setText(it)
@@ -65,11 +74,9 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
             enteredPassword = it.toString()
         }
 
-        val signInBtn: Button = view.findViewById(R.id.signInBtn)
-        signInBtn.setOnClickListener {
-
+        binding.signInBtn.setOnClickListener {
             if (enteredUsername == "rstm_avzv" && enteredPassword == "1234") {
-                (activity as? MainActivity)?.navigateToHome()
+                findNavController().navigate(R.id.action_signInFragment_to_homeFragment)
             } else {
                 Toast.makeText(
                     requireContext(),
@@ -78,5 +85,11 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
                 ).show()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+        Log.d("SignInFragment", "Fragment Destroyed")
     }
 }
