@@ -6,8 +6,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import rut.miit.simplemessanger.fragments.HomeFragment
-import rut.miit.simplemessanger.fragments.OnBoardFragment
 import rut.miit.simplemessanger.fragments.SignInFragment
 import rut.miit.simplemessanger.fragments.SignUpFragment
 
@@ -25,9 +25,18 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "created")
     }
 
-    fun navigateToSignIn() {
+    fun navigateToSignIn(username: String?, password: String?) {
+        val bundle: Bundle = Bundle().apply {
+            putString("username", username)
+            putString("password", password)
+        }
+
+        val signInFragment: Fragment = SignInFragment().apply {
+            arguments = bundle
+        }
+
         supportFragmentManager.beginTransaction()
-            .replace(R.id.mainFragment, SignInFragment())
+            .replace(R.id.mainFragment, signInFragment)
             .addToBackStack(null)
             .commit()
     }
