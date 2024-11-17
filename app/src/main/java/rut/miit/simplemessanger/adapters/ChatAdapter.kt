@@ -18,7 +18,7 @@ class ChatAdapter(private val chats: List<Chat>, var context: Context):
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHandler {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.chat, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat, parent, false)
         return MyViewHandler(view)
     }
 

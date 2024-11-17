@@ -11,4 +11,12 @@
     <string name="password_hint">Введите пароль</string>
     <string name="sign_up_btn">Зарегестрироваться</string>
     <string name="username_chat">username</string>
+    <string name="name">Name</string>
+    <string name="culture">Culture</string>
+    <string name="born">Born</string>
+    <string name="titles">Titles</string>
+    <string name="aliases">Aliases</string>
+    <string name="played_by">Played By</string>
+    <string name="previewPage"><![CDATA[<]]></string>
+    <string name="nextPage"><![CDATA[>]]></string>
 </resources>
