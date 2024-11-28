@@ -68,7 +68,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         binding.preview.setOnClickListener {
             currentPage--
-            loadCharacters(adapter, currentPage)
+            if (currentPage == 0) {
+                Toast.makeText(requireContext(), "Нельзя", Toast.LENGTH_SHORT).show()
+                currentPage++
+            } else {
+                loadCharacters(adapter, currentPage)
+            }
         }
 
         binding.archive.setOnClickListener {
@@ -80,11 +85,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun loadCharacters(adapter: CharactersAdapter, page: Int) {
         lifecycleScope.launch {
             try {
+                binding.next.isEnabled = false
+                binding.preview.isEnabled = false
+
                 val characters = retrofitApi.getCharacters(page = page, pageSize = pageSize)
                 Log.d("API", "Loaded characters: ${characters.size}")
 
                 adapter.setData(characters)
                 updatePageText()
+
+                binding.next.isEnabled = true
+                binding.preview.isEnabled = true
             } catch (e: Exception) {
                 Toast.makeText(
                     requireContext(),
