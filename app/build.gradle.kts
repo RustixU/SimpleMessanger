@@ -41,6 +41,15 @@ android {
 }
 
 dependencies {
+    // DataStore для работы с Preferences
+    implementation(libs.androidx.datastore.preferences)
+
+    // Kotlin Coroutines для работы с DataStore
+    implementation(libs.kotlinx.coroutines.android)
+
+    // AppCompat и другие библиотеки
+    implementation(libs.androidx.appcompat.v161)
+    implementation(libs.androidx.core.ktx.v1101)
 
 //    navigation
     implementation(libs.androidx.navigation.fragment.ktx)

@@ -1,60 +1,106 @@
 package rut.miit.simplemessanger.fragments
 
+import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import rut.miit.simplemessanger.R
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import rut.miit.simplemessanger.databinding.FragmentSettingsBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [SettingsFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class SettingsFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding: FragmentSettingsBinding
+        get() = _binding ?: throw RuntimeException("FragmentSettingsBinding == null")
+
+    private val sharedPreferences by lazy {
+        requireContext().getSharedPreferences("1", Context.MODE_PRIVATE)
+    }
+
+    private val Context.dataStore by preferencesDataStore("1")
+
+    private val NOTIFICATIONS_KEY = booleanPreferencesKey("notifications_enabled")
+    private val LANGUAGE_KEY = stringPreferencesKey("language")
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupLanguagesSpinner()
+
+        loadFromSharedPreferences()
+        lifecycleScope.launch {
+            loadFromDataStore()
+        }
+
+        binding.saveBtn.setOnClickListener {
+            saveToSharedPreferences()
+            lifecycleScope.launch {
+                saveToDataStore()
+            }
+            Toast.makeText(requireContext(), "Settings saved", Toast.LENGTH_SHORT).show()
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false)
+    private fun saveToSharedPreferences() {
+        val editor = sharedPreferences.edit()
+        editor.putString("nickname", binding.nicknameEditText.text.toString())
+        editor.putBoolean("theme", binding.themeSwitch.isChecked)
+        editor.apply()
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment SettingsFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            SettingsFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    private fun loadFromSharedPreferences() {
+        val nickname = sharedPreferences.getString("nickname", "")
+        val theme = sharedPreferences.getBoolean("theme", false)
+
+        binding.nicknameEditText.setText(nickname)
+        binding.themeSwitch.isChecked = theme
+    }
+
+    private suspend fun saveToDataStore() {
+        requireContext().dataStore.edit { preferences ->
+            preferences[NOTIFICATIONS_KEY] = binding.notificationsEnabledBtn.isChecked
+            preferences[LANGUAGE_KEY] = binding.languages.selectedItem.toString()
+        }
+    }
+
+    private suspend fun loadFromDataStore() {
+        requireContext().dataStore.data.collect { preferences ->
+            val notificationsEnabled = preferences[NOTIFICATIONS_KEY] ?: false
+            val language = preferences[LANGUAGE_KEY] ?: "English"
+
+            binding.notificationsEnabledBtn.isChecked = notificationsEnabled
+            val languageIndex =
+                (binding.languages.adapter as ArrayAdapter<String>).getPosition(language)
+            binding.languages.setSelection(languageIndex)
+        }
+    }
+
+    private fun setupLanguagesSpinner() {
+        val languages = listOf("English", "Russian", "Spanish")
+        val adapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, languages)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.languages.adapter = adapter
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

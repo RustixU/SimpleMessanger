@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import rut.miit.simplemessanger.R
@@ -79,6 +80,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.archive.setOnClickListener {
             currentPage = 1
             loadCharacters(adapter, currentPage)
+        }
+
+        binding.settingsImageBtn.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_settingsFragment)
         }
     }
 
