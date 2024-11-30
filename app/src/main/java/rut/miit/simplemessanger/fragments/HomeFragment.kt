@@ -2,21 +2,24 @@ package rut.miit.simplemessanger.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import rut.miit.simplemessanger.R
 import rut.miit.simplemessanger.adapters.CharactersAdapter
 import rut.miit.simplemessanger.databinding.FragmentHomeBinding
+import rut.miit.simplemessanger.models.Character
 import rut.miit.simplemessanger.network.ApiService
 import rut.miit.simplemessanger.network.RetrofitNetwork
+import java.io.File
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -30,9 +33,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var _retrofitApi: ApiService? = null
     private val retrofitApi get() = _retrofitApi ?: throw RuntimeException("ApiService == null")
 
+    private val fileName = "1_Avezov.txt"
+    private lateinit var savingData: List<Character>
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
@@ -62,50 +67,57 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         loadCharacters(adapter, currentPage)
 
-        binding.next.setOnClickListener {
+        val nextPageBtn = binding.nextPageBtn
+        val previewPageBtn = binding.previewPageBtn
+        val saveBtn = binding.saveImageBtn
+        val deleteBtn = binding.deleteImageBtn
+
+        binding.pageTextView.addTextChangedListener {
+            previewPageBtn.isEnabled = currentPage > 1
+        }
+
+        nextPageBtn.setOnClickListener {
             currentPage++
             loadCharacters(adapter, currentPage)
         }
 
-        binding.preview.setOnClickListener {
-            currentPage--
-            if (currentPage == 0) {
-                Toast.makeText(requireContext(), "Нельзя", Toast.LENGTH_SHORT).show()
-                currentPage++
-            } else {
+        previewPageBtn.setOnClickListener {
+            if (currentPage > 1) {
+                currentPage--
                 loadCharacters(adapter, currentPage)
+            } else {
+                Toast.makeText(requireContext(), "Нельзя", Toast.LENGTH_SHORT).show()
             }
         }
 
-        binding.archive.setOnClickListener {
-            currentPage = 1
-            loadCharacters(adapter, currentPage)
+        saveBtn.setOnClickListener {
+            saveHeroesToFile(savingData)
         }
 
-        binding.settingsImageBtn.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_settingsFragment)
+        deleteBtn.setOnClickListener {
+            createBackupFile(savingData)
+            deleteFile()
         }
     }
 
     private fun loadCharacters(adapter: CharactersAdapter, page: Int) {
         lifecycleScope.launch {
             try {
-                binding.next.isEnabled = false
-                binding.preview.isEnabled = false
+                binding.nextPageBtn.isEnabled = false
+                binding.previewPageBtn.isEnabled = false
 
                 val characters = retrofitApi.getCharacters(page = page, pageSize = pageSize)
+                savingData = characters
                 Log.d("API", "Loaded characters: ${characters.size}")
 
                 adapter.setData(characters)
                 updatePageText()
 
-                binding.next.isEnabled = true
-                binding.preview.isEnabled = true
+                binding.nextPageBtn.isEnabled = true
+                binding.previewPageBtn.isEnabled = true
             } catch (e: Exception) {
                 Toast.makeText(
-                    requireContext(),
-                    "Ошибка: ${e.localizedMessage}",
-                    Toast.LENGTH_SHORT
+                    requireContext(), "Ошибка: ${e.localizedMessage}", Toast.LENGTH_SHORT
                 ).show()
             }
         }
@@ -114,6 +126,68 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     @SuppressLint("SetTextI18n")
     private fun updatePageText() {
         binding.pageTextView.text = "Page: $currentPage"
+    }
+
+    private fun saveHeroesToFile(characters: List<Character>) {
+        val fileContent = characters.joinToString("\n") { character ->
+            "Name: ${character.name}, Culture: ${character.culture}"
+        }
+
+        val externalStorageDir =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        val file = File(externalStorageDir, fileName)
+
+        try {
+            if (isFileExists()) {
+                Toast.makeText(requireContext(), "Файл уже сохранён", Toast.LENGTH_SHORT).show()
+            } else {
+                file.writeText(fileContent)
+                Toast.makeText(
+                    requireContext(), "Файл сохранён: ${file.absolutePath}", Toast.LENGTH_SHORT
+                ).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(
+                requireContext(),
+                "Ошибка сохранения файла: ${e.localizedMessage}",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun deleteFile() {
+        val externalStorageDir =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        val file = File(externalStorageDir, fileName)
+
+        if (isFileExists()) {
+            file.delete()
+            Toast.makeText(requireContext(), "Файл удалён", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(requireContext(), "Файл не найден", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun isFileExists(): Boolean {
+        val externalStorageDir =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        val file = File(externalStorageDir, fileName)
+        return file.exists()
+    }
+
+    private fun createBackupFile(characters: List<Character>) {
+        val fileContent = characters.joinToString("\n") { character ->
+            "Name: ${character.name}, Culture: ${character.culture}"
+        }
+
+        val backupFile = File(requireContext().filesDir, fileName)
+
+        try {
+            backupFile.writeText(fileContent)
+            Log.d("Backup", "Резервная копия создана: ${backupFile.absolutePath}")
+        } catch (e: Exception) {
+            Log.d("Backup", "Ошибка создания резервной копии: ${e.localizedMessage}")
+        }
     }
 
     override fun onDestroyView() {

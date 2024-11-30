@@ -6,7 +6,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.navigation.fragment.NavHostFragment
 import rut.miit.simplemessanger.databinding.ActivityMainBinding
+import rut.miit.simplemessanger.fragments.OnBoardFragment
+import rut.miit.simplemessanger.fragments.SettingsFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,34 +32,45 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-//        binding.hostFragment.setOnApplyWindowInsetsListener { _, insets ->
-//            checkCurrentFragment()
-//            insets
-//        }
+        supportFragmentManager.registerFragmentLifecycleCallbacks(
+            object : FragmentManager.FragmentLifecycleCallbacks() {
+                override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
+                    if (f.id == R.id.hostFragment) {
+                        setVisibleSettingsBtn(f)
+                        Log.d("FragmentTracker", "Active fragment: ${f::class.java.simpleName}")
+                    }
+                }
+            },
+            true
+        )
+
+        binding.settingsImageBtn.setOnClickListener {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.hostFragment, SettingsFragment())
+                .addToBackStack(null)
+                .commit()
+        }
 
         Log.d("MainActivity", "created")
     }
 
-//    private fun checkCurrentFragment() {
-//        val navHostFragment = supportFragmentManager.findFragmentById(R.id.hostFragment) as? NavHostFragment
-//        val currentFragment = navHostFragment?.childFragmentManager?.fragments?.firstOrNull()
-//
-//        Log.d("FragmentTracker", "Current fragment: ${currentFragment?.javaClass?.simpleName ?: "None"}")
-//
-//        if (currentFragment is OnBoardFragment) {
-//            binding.settingsImageBtn.isEnabled = false
-//            binding.settingsImageBtn.isVisible = false
-//            Log.d("FragmentTracker", "OnBoardFragment is active, settingsImageBtn disabled")
-//        } else {
-//            binding.settingsImageBtn.isEnabled = true
-//            binding.settingsImageBtn.isVisible = true
-//            Log.d("FragmentTracker", "Other fragment is active, settingsImageBtn enabled")
-//        }
-//    }
+    private fun setVisibleSettingsBtn(currentFragment: Fragment?) {
+        if (currentFragment is NavHostFragment) {
+            Log.d("FragmentTracker", "NavHostFragment detected, skipping check.")
+            return
+        }
+
+        if (currentFragment is OnBoardFragment || currentFragment is SettingsFragment) {
+            binding.settingsImageBtn.isVisible = false
+            Log.d("FragmentTracker", "OnBoardFragment is active, settingsImageBtn disabled")
+        } else {
+            binding.settingsImageBtn.isVisible = true
+            Log.d("FragmentTracker", "Other fragment is active, settingsImageBtn enabled")
+        }
+    }
 
     override fun onResume() {
         super.onResume()
-//        checkCurrentFragment()
         Log.d("MainActivity", "resumed")
     }
 

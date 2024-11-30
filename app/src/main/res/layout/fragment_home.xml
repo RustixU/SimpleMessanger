@@ -7,22 +7,11 @@
     android:orientation="vertical"
     tools:context=".fragments.HomeFragment">
 
-    <ImageButton
-        android:id="@+id/settingsImageBtn"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="16dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="Настройки"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/baseline_settings_24" />
-
     <TextView
         android:id="@+id/pageTextView"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
+        android:layout_marginTop="10dp"
         android:text="Page"
         android:textAlignment="center"
         android:textSize="20sp"
@@ -32,7 +21,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/next"
+        android:id="@+id/nextPageBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="40dp"
@@ -44,7 +33,7 @@
         app:layout_constraintTop_toBottomOf="@+id/charactersList" />
 
     <Button
-        android:id="@+id/preview"
+        android:id="@+id/previewPageBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="40dp"
@@ -62,19 +51,30 @@
         android:layout_marginBottom="60dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/archive" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
-        android:id="@+id/archive"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
+    <ImageButton
+        android:id="@+id/saveImageBtn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
-        android:backgroundTint="#B7FF9800"
-        android:text="В начало"
-        android:textColor="@color/light_blue_900"
+        android:background="@android:color/transparent"
+        android:contentDescription="Сохранить героев"
+        android:src="@drawable/baseline_save_24"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/deleteImageBtn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="Удалить героев"
+        android:src="@drawable/baseline_delete_24"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
