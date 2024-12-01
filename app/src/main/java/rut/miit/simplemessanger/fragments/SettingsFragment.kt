@@ -61,14 +61,12 @@ class SettingsFragment : Fragment() {
             loadFromDataStore()
         }
 
-
-
         saveSettingsBtn.setOnClickListener {
             saveToSharedPreferences()
             lifecycleScope.launch {
                 saveToDataStore()
             }
-            Toast.makeText(requireContext(), "Настройки сохранён", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Настройки сохранены", Toast.LENGTH_SHORT).show()
         }
 
         restoreBackupBtn.setOnClickListener {
@@ -113,8 +111,8 @@ class SettingsFragment : Fragment() {
                 val language = preferences[languageKey] ?: "English"
 
                 binding.notificationsEnabledBtn.isChecked = notificationsEnabled
-                val languageIndex = (binding.languages.adapter as ArrayAdapter<String>)
-                    .getPosition(language)
+                val languageIndex =
+                    (binding.languages.adapter as ArrayAdapter<String>).getPosition(language)
                 binding.languages.setSelection(languageIndex)
             }
         }
@@ -127,12 +125,18 @@ class SettingsFragment : Fragment() {
         val restoredFile = File(externalStorageDir, fileName)
 
         try {
-            restoredFile.writeText(backupFile.readText())
-            Toast.makeText(
-                requireContext(),
-                "Файл восстановлен: ${restoredFile.absolutePath}",
-                Toast.LENGTH_SHORT
-            ).show()
+            if (isFileExists()) {
+                Toast.makeText(
+                    requireContext(), "Файл уже восстановлен", Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                restoredFile.writeText(backupFile.readText())
+                Toast.makeText(
+                    requireContext(),
+                    "Файл восстановлен: ${restoredFile.absolutePath}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         } catch (e: Exception) {
             Toast.makeText(
                 requireContext(),
@@ -140,6 +144,13 @@ class SettingsFragment : Fragment() {
                 Toast.LENGTH_SHORT
             ).show()
         }
+    }
+
+    private fun isFileExists(): Boolean {
+        val externalStorageDir =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        val file = File(externalStorageDir, fileName)
+        return file.exists()
     }
 
     private fun isBackupExists(): Boolean {

@@ -103,6 +103,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun loadCharacters(adapter: CharactersAdapter, page: Int) {
         lifecycleScope.launch {
             try {
+                binding.saveImageBtn.isEnabled = false
                 binding.nextPageBtn.isEnabled = false
                 binding.previewPageBtn.isEnabled = false
 
@@ -113,6 +114,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 adapter.setData(characters)
                 updatePageText()
 
+                binding.saveImageBtn.isEnabled = true
                 binding.nextPageBtn.isEnabled = true
                 binding.previewPageBtn.isEnabled = true
             } catch (e: Exception) {
@@ -139,7 +141,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         try {
             if (isFileExists()) {
-                Toast.makeText(requireContext(), "Файл уже сохранён", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Файл уже существует", Toast.LENGTH_SHORT).show()
             } else {
                 file.writeText(fileContent)
                 Toast.makeText(
