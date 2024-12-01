@@ -35,8 +35,8 @@ class SettingsFragment : Fragment() {
 
     private val dataStore by lazy { requireContext().dataStore }
 
-    private val NOTIFICATIONS_KEY = booleanPreferencesKey("notifications_enabled")
-    private val LANGUAGE_KEY = stringPreferencesKey("language")
+    private val notificationsKey = booleanPreferencesKey("notifications_enabled")
+    private val languageKey = stringPreferencesKey("language")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -100,8 +100,8 @@ class SettingsFragment : Fragment() {
     private suspend fun saveToDataStore() {
         lifecycleScope.launch {
             dataStore.edit { preferences ->
-                preferences[NOTIFICATIONS_KEY] = binding.notificationsEnabledBtn.isChecked
-                preferences[LANGUAGE_KEY] = binding.languages.selectedItem.toString()
+                preferences[notificationsKey] = binding.notificationsEnabledBtn.isChecked
+                preferences[languageKey] = binding.languages.selectedItem.toString()
             }
         }
     }
@@ -109,8 +109,8 @@ class SettingsFragment : Fragment() {
     private suspend fun loadFromDataStore() {
         lifecycleScope.launch {
             dataStore.data.collect { preferences ->
-                val notificationsEnabled = preferences[NOTIFICATIONS_KEY] ?: false
-                val language = preferences[LANGUAGE_KEY] ?: "English"
+                val notificationsEnabled = preferences[notificationsKey] ?: false
+                val language = preferences[languageKey] ?: "English"
 
                 binding.notificationsEnabledBtn.isChecked = notificationsEnabled
                 val languageIndex = (binding.languages.adapter as ArrayAdapter<String>)

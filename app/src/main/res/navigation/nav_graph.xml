@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/onBoardFragment">
@@ -9,7 +9,7 @@
         android:id="@+id/onBoardFragment"
         android:name="rut.miit.simplemessanger.fragments.OnBoardFragment"
         android:label="fragment_on_board"
-        tools:layout="@layout/fragment_on_board" >
+        tools:layout="@layout/fragment_on_board">
         <action
             android:id="@+id/action_onBoardFragment_to_signUpFragment"
             app:destination="@id/signUpFragment" />
@@ -21,7 +21,7 @@
         android:id="@+id/signInFragment"
         android:name="rut.miit.simplemessanger.fragments.SignInFragment"
         android:label="fragment_sign_in"
-        tools:layout="@layout/fragment_sign_in" >
+        tools:layout="@layout/fragment_sign_in">
         <action
             android:id="@+id/action_signInFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
@@ -30,16 +30,14 @@
         android:id="@+id/signUpFragment"
         android:name="rut.miit.simplemessanger.fragments.SignUpFragment"
         android:label="fragment_sign_up"
-        tools:layout="@layout/fragment_sign_up" >
+        tools:layout="@layout/fragment_sign_up">
         <action
             android:id="@+id/action_signUpFragment_to_signInFragment"
-            app:destination="@id/signInFragment">
-            <argument android:name="username"
-                app:argType="string" />
-            <argument
-                android:name="password"
-                app:argType="string" />
-        </action>
+            app:destination="@id/signInFragment" />
+        <argument
+            android:name="user"
+            app:argType="rut.miit.simplemessanger.models.User" />
+
     </fragment>
     <fragment
         android:id="@+id/homeFragment"

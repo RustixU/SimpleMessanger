@@ -10,6 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import rut.miit.simplemessanger.R
 import rut.miit.simplemessanger.databinding.FragmentSignUpBinding
+import rut.miit.simplemessanger.models.User
+
+private const val ARG_USER = "user"
 
 class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
 
@@ -34,12 +37,11 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
         binding.signUpBtn.setOnClickListener {
             val username = usernameEditText.text.toString()
             val password = passwordEditText.text.toString()
+            val user = User(username, password)
+            val bundle = Bundle()
+            bundle.putParcelable(ARG_USER, user)
 
-            val action = SignUpFragmentDirections.actionSignUpFragmentToSignInFragment(
-                username = username,
-                password = password)
-
-            findNavController().navigate(action)
+            findNavController().navigate(R.id.action_signUpFragment_to_signInFragment, bundle)
         }
     }
 
