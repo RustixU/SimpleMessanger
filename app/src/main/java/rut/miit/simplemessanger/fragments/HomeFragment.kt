@@ -12,13 +12,18 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import rut.miit.simplemessanger.R
 import rut.miit.simplemessanger.adapters.CharactersAdapter
+import rut.miit.simplemessanger.database.AppDatabase
 import rut.miit.simplemessanger.databinding.FragmentHomeBinding
-import rut.miit.simplemessanger.models.Character
+import rut.miit.simplemessanger.entity.Character
 import rut.miit.simplemessanger.network.ApiService
 import rut.miit.simplemessanger.network.RetrofitNetwork
+import rut.miit.simplemessanger.repositories.CharacterRepository
 import java.io.File
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
@@ -30,11 +35,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var currentPage = 1
     private val pageSize = 50
 
+    private lateinit var repository: CharacterRepository
+
     private var _retrofitApi: ApiService? = null
     private val retrofitApi get() = _retrofitApi ?: throw RuntimeException("ApiService == null")
 
     private val fileName = "1_Avezov.txt"
     private lateinit var savingData: List<Character>
+
+    var isLoading = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -46,17 +55,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        val chats = arrayListOf(
-//            Chat("John", "Привет, сегодня идём гулять?"),
-//            Chat("Alice", "Что делаешь?"),
-//            Chat("Alexey", "Бро, я такой клатч потащил")
-//        )
-//
-//        val list: RecyclerView = view.findViewById(R.id.chatsList)
-//
-//        list.layoutManager = GridLayoutManager(requireContext(), 1)
-//        list.adapter = ChatAdapter(chats, requireContext())
-
         _retrofitApi = RetrofitNetwork()
 
         val recyclerView = binding.charactersList
@@ -65,30 +63,37 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val adapter = CharactersAdapter(emptyList())
         recyclerView.adapter = adapter
 
-        loadCharacters(adapter, currentPage)
+        val database = AppDatabase.getDatabase(requireContext())
+        repository = CharacterRepository(database.characterDao())
 
-        val nextPageBtn = binding.nextPageBtn
-        val previewPageBtn = binding.previewPageBtn
-        val saveBtn = binding.saveImageBtn
-        val deleteBtn = binding.deleteImageBtn
-
-        binding.pageTextView.addTextChangedListener {
-            previewPageBtn.isEnabled = currentPage > 1
-        }
-
-        nextPageBtn.setOnClickListener {
-            currentPage++
+        lifecycleScope.launch {
             loadCharacters(adapter, currentPage)
         }
 
-        previewPageBtn.setOnClickListener {
-            if (currentPage > 1) {
-                currentPage--
-                loadCharacters(adapter, currentPage)
-            } else {
-                Toast.makeText(requireContext(), "Нельзя", Toast.LENGTH_SHORT).show()
+//        val nextPageBtn = binding.nextPageBtn
+//        val previewPageBtn = binding.previewPageBtn
+        val saveBtn = binding.saveImageBtn
+        val deleteBtn = binding.deleteImageBtn
+
+//        binding.pageTextView.addTextChangedListener {
+//            previewPageBtn.isEnabled = currentPage > 1
+//        }
+
+        binding.charactersList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val totalItemCount = layoutManager.itemCount
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+
+                if (!isLoading && totalItemCount <= lastVisibleItem + 5) {
+                    isLoading = true
+                    currentPage++
+                    loadCharacters(adapter, currentPage)
+                }
             }
-        }
+        })
 
         saveBtn.setOnClickListener {
             saveHeroesToFile(savingData)
@@ -101,26 +106,28 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun loadCharacters(adapter: CharactersAdapter, page: Int) {
-        lifecycleScope.launch {
-            try {
-                binding.saveImageBtn.isEnabled = false
-                binding.nextPageBtn.isEnabled = false
-                binding.previewPageBtn.isEnabled = false
+        lifecycleScope.launch(Dispatchers.IO) {
+            val characters = repository.getCharacters()
 
-                val characters = retrofitApi.getCharacters(page = page, pageSize = pageSize)
-                savingData = characters
-                Log.d("API", "Loaded characters: ${characters.size}")
-
+            if (characters.isNotEmpty()) {
                 adapter.setData(characters)
-                updatePageText()
+            } else {
+                try {
+                    binding.saveImageBtn.isEnabled = false
 
-                binding.saveImageBtn.isEnabled = true
-                binding.nextPageBtn.isEnabled = true
-                binding.previewPageBtn.isEnabled = true
-            } catch (e: Exception) {
-                Toast.makeText(
-                    requireContext(), "Ошибка: ${e.localizedMessage}", Toast.LENGTH_SHORT
-                ).show()
+                    val characters = retrofitApi.getCharacters(page = page, pageSize = pageSize)
+                    savingData = characters
+                    Log.d("API", "Loaded characters: ${characters.size}")
+
+                    adapter.setData(characters)
+                    updatePageText()
+
+                    binding.saveImageBtn.isEnabled = true
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        requireContext(), "Ошибка: ${e.localizedMessage}", Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }

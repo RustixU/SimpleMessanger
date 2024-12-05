@@ -3,9 +3,10 @@ package rut.miit.simplemessanger.adapters
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import rut.miit.simplemessanger.databinding.ItemCharacterBinding
-import rut.miit.simplemessanger.models.Character
+import rut.miit.simplemessanger.entity.Character
 
 class CharactersAdapter(private var data: List<Character>) :
     RecyclerView.Adapter<CharactersAdapter.CharacterViewHolder>() {
@@ -40,5 +41,10 @@ class CharactersAdapter(private var data: List<Character>) :
     fun setData(newData: List<Character>) {
         data = newData
         notifyDataSetChanged()
+    }
+
+    companion object DiffCallback : DiffUtil.ItemCallback<Character>() {
+        override fun areItemsTheSame(oldItem: Character, newItem: Character) = oldItem.id == newItem.id
+        override fun areContentsTheSame(oldItem: Character, newItem: Character) = oldItem == newItem
     }
 }

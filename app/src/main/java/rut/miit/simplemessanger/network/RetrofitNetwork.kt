@@ -6,7 +6,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Query
-import rut.miit.simplemessanger.models.Character
+import rut.miit.simplemessanger.entity.Character
 
 
 interface ApiService {
