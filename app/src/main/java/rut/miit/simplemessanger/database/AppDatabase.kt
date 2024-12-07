@@ -5,12 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import rut.miit.simplemessanger.converters.Converters
+import rut.miit.simplemessanger.converters.TypeConverter
 import rut.miit.simplemessanger.dao.CharacterDao
 import rut.miit.simplemessanger.entity.Character
 
-@Database(entities = [Character::class], version = 1)
-@TypeConverters(Converters::class)
+@Database(entities = [Character::class], version = 2)
+@TypeConverters(TypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun characterDao(): CharacterDao
@@ -25,7 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "characters_database"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }

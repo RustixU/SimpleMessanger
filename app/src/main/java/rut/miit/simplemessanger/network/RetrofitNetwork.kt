@@ -1,9 +1,8 @@
 package rut.miit.simplemessanger.network
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 import rut.miit.simplemessanger.entity.Character
@@ -27,7 +26,7 @@ class RetrofitNetwork : ApiService {
 
     private val retrofit = Retrofit.Builder()
         .baseUrl(NETWORK_BASE_URL)
-        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+        .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(ApiService::class.java)
 

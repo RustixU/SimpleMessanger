@@ -60,7 +60,7 @@ dependencies {
 //    retrofit
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
-    implementation(libs.retrofit2.kotlinx.serialization.converter.v100)
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.okhttp)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
@@ -70,15 +70,14 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
 
-    implementation(libs.androidx.room.runtime.v252)
-    ksp(libs.androidx.room.compiler)
-
-    // Для поддержки Kotlin Flow
-    implementation(libs.androidx.room.ktx.v252)
+    // room
+    implementation (libs.androidx.room.runtime)
+    implementation (libs.androidx.room.ktx)
+    implementation(libs.converter.gson)
+    ksp (libs.androidx.room.compiler)
 
     // Kotlin стандартные библиотеки
     implementation(libs.kotlin.stdlib)
-    implementation(libs.gson)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -2,7 +2,7 @@ package rut.miit.simplemessanger.converters
 
 import androidx.room.TypeConverter
 
-class Converters {
+object TypeConverter {
     @TypeConverter
     fun fromString(value: String?): List<String>? {
         return value?.split(",")?.map { it.trim() }

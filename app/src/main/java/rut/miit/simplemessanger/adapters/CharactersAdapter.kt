@@ -15,12 +15,12 @@ class CharactersAdapter(private var data: List<Character>) :
 
         fun bind(character: Character) {
             with(binding) {
-                nameTextView.text = character.name
-                cultureTextView.text = character.culture
-                bornTextView.text = character.born
-                titlesTextView.text = character.titles.joinToString(", ")
-                aliasesTextView.text = character.aliases.joinToString(", ")
-                playedByTextView.text = character.playedBy.joinToString(", ")
+                nameTextView.text = character.name ?: "Unknown"
+                cultureTextView.text = character.culture ?: "Unknown"
+                bornTextView.text = character.born ?: "Unknown"
+                titlesTextView.text = character.titles?.joinToString(", ") ?: "Unknown"
+                aliasesTextView.text = character.aliases?.joinToString(", ") ?: "Unknown"
+                playedByTextView.text = character.playedBy?.joinToString(", ") ?: "Unknown"
             }
         }
     }

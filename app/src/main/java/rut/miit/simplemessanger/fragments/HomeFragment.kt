@@ -1,6 +1,5 @@
 package rut.miit.simplemessanger.fragments
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -8,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,6 +34,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val pageSize = 50
 
     private lateinit var repository: CharacterRepository
+    private lateinit var adapter: CharactersAdapter
 
     private var _retrofitApi: ApiService? = null
     private val retrofitApi get() = _retrofitApi ?: throw RuntimeException("ApiService == null")
@@ -60,20 +59,23 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val recyclerView = binding.charactersList
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val adapter = CharactersAdapter(emptyList())
+        adapter = CharactersAdapter(emptyList())
         recyclerView.adapter = adapter
 
         val database = AppDatabase.getDatabase(requireContext())
         repository = CharacterRepository(database.characterDao())
 
-        lifecycleScope.launch {
-            loadCharacters(adapter, currentPage)
-        }
+        loadCharactersFromDatabase()
 
 //        val nextPageBtn = binding.nextPageBtn
 //        val previewPageBtn = binding.previewPageBtn
-        val saveBtn = binding.saveImageBtn
-        val deleteBtn = binding.deleteImageBtn
+//        val saveBtn = binding.saveImageBtn
+//        val deleteBtn = binding.deleteImageBtn
+        val loadFromApiBtn = binding.loadFromApiImageButton
+
+        loadFromApiBtn.setOnClickListener{
+            updateCharactersFromApi()
+        }
 
 //        binding.pageTextView.addTextChangedListener {
 //            previewPageBtn.isEnabled = currentPage > 1
@@ -90,52 +92,143 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 if (!isLoading && totalItemCount <= lastVisibleItem + 5) {
                     isLoading = true
                     currentPage++
-                    loadCharacters(adapter, currentPage)
+                    loadNextPage()
                 }
             }
         })
 
-        saveBtn.setOnClickListener {
-            saveHeroesToFile(savingData)
-        }
+//        saveBtn.setOnClickListener {
+//            saveHeroesToFile(savingData)
+//        }
+//
+//        deleteBtn.setOnClickListener {
+//            createBackupFile(savingData)
+//            deleteFile()
+//        }
+    }
 
-        deleteBtn.setOnClickListener {
-            createBackupFile(savingData)
-            deleteFile()
+    private fun loadNextPage() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val apiCharacters = retrofitApi.getCharacters(currentPage, pageSize)
+
+                if (apiCharacters.isNotEmpty()) {
+                    val entities = apiCharacters.map { response ->
+                        Character(
+                            name = response.name,
+                            culture = response.culture,
+                            born = response.born,
+                            titles = response.titles,
+                            aliases = response.aliases,
+                            playedBy = response.playedBy
+                        )
+                    }
+
+                    val layoutManager =
+                        binding.charactersList.layoutManager as LinearLayoutManager//
+                    val currentPosition = layoutManager.findFirstVisibleItemPosition()//
+
+                    repository.insertCharacters(entities)
+
+                    val characters = repository.getCharacters().first()
+                    adapter.setData(characters)
+
+                    layoutManager.scrollToPosition(currentPosition)
+
+                } else {
+                    Log.d("HomeFragment", "No more characters to load.")
+                }
+
+                isLoading = false
+
+            } catch (e: Exception) {
+                Log.e(
+                    "HomeFragment",
+                    "Error fetching characters for page $currentPage: ${e.message}"
+                )
+                isLoading = false
+            }
         }
     }
 
-    private fun loadCharacters(adapter: CharactersAdapter, page: Int) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val characters = repository.getCharacters()
-
-            if (characters.isNotEmpty()) {
-                adapter.setData(characters)
-            } else {
-                try {
-                    binding.saveImageBtn.isEnabled = false
-
-                    val characters = retrofitApi.getCharacters(page = page, pageSize = pageSize)
-                    savingData = characters
-                    Log.d("API", "Loaded characters: ${characters.size}")
-
-                    adapter.setData(characters)
-                    updatePageText()
-
-                    binding.saveImageBtn.isEnabled = true
-                } catch (e: Exception) {
-                    Toast.makeText(
-                        requireContext(), "Ошибка: ${e.localizedMessage}", Toast.LENGTH_SHORT
-                    ).show()
+    private fun loadCharactersFromDatabase() {
+        lifecycleScope.launch {
+            repository.getCharacters().collect { characters ->
+                if (characters.isNotEmpty()) {
+                    binding.charactersList.adapter = CharactersAdapter(characters)
+                } else {
+                    fetchAndSaveCharacters()
                 }
             }
         }
     }
 
-    @SuppressLint("SetTextI18n")
-    private fun updatePageText() {
-        binding.pageTextView.text = "Page: $currentPage"
+    private fun updateCharactersFromApi() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val apiCharacters = retrofitApi.getCharacters(currentPage, pageSize)
+
+                val entities = apiCharacters.map { response ->
+                    Character(
+                        name = response.name,
+                        culture = response.culture,
+                        born = response.born,
+                        titles = response.titles,
+                        aliases = response.aliases,
+                        playedBy = response.playedBy
+                    )
+                }
+
+                Log.d("HomeFragment", "ENTITIES = $entities")
+
+                repository.deleteAll()
+                repository.insertCharacters(entities)
+
+                val layoutManager = binding.charactersList.layoutManager as LinearLayoutManager
+                val currentPosition = layoutManager.findFirstVisibleItemPosition()
+
+                val characters = repository.getCharacters().first()
+                activity?.runOnUiThread {
+                    adapter.setData(characters)
+
+                    layoutManager.scrollToPosition(currentPosition)
+                }
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "Error updating characters: ${e.message}")
+            }
+        }
     }
+
+    private fun fetchAndSaveCharacters() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val apiCharacters = retrofitApi.getCharacters(currentPage, pageSize)
+
+                val entities = apiCharacters.map { response ->
+                    Character(
+                        name = response.name,
+                        culture = response.culture,
+                        born = response.born,
+                        titles = response.titles,
+                        aliases = response.aliases,
+                        playedBy = response.playedBy
+                    )
+                }
+
+                repository.insertCharacters(entities)
+
+                Log.d("HomeFragment", "Characters saved to database")
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "Error fetching characters: ${e.message}")
+            }
+        }
+    }
+
+
+//    @SuppressLint("SetTextI18n")
+//    private fun updatePageText() {
+//        binding.pageTextView.text = "Page: $currentPage"
+//    }
 
     private fun saveHeroesToFile(characters: List<Character>) {
         val fileContent = characters.joinToString("\n") { character ->
