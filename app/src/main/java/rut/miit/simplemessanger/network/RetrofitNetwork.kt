@@ -1,6 +1,5 @@
 package rut.miit.simplemessanger.network
 
-import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
@@ -19,11 +18,6 @@ interface ApiService {
 private const val NETWORK_BASE_URL = "https://www.anapioficeandfire.com/api/"
 
 class RetrofitNetwork : ApiService {
-    private val json = Json {
-        isLenient = true
-        ignoreUnknownKeys = true
-    }
-
     private val retrofit = Retrofit.Builder()
         .baseUrl(NETWORK_BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())

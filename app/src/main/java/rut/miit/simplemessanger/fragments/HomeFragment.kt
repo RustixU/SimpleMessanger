@@ -1,12 +1,10 @@
 package rut.miit.simplemessanger.fragments
 
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,7 +20,6 @@ import rut.miit.simplemessanger.entity.Character
 import rut.miit.simplemessanger.network.ApiService
 import rut.miit.simplemessanger.network.RetrofitNetwork
 import rut.miit.simplemessanger.repositories.CharacterRepository
-import java.io.File
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -39,8 +36,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var _retrofitApi: ApiService? = null
     private val retrofitApi get() = _retrofitApi ?: throw RuntimeException("ApiService == null")
 
-    private val fileName = "1_Avezov.txt"
-    private lateinit var savingData: List<Character>
+//    private val fileName = "1_Avezov.txt"
+//    private lateinit var savingData: List<Character>
 
     var isLoading = false
 
@@ -230,67 +227,67 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 //        binding.pageTextView.text = "Page: $currentPage"
 //    }
 
-    private fun saveHeroesToFile(characters: List<Character>) {
-        val fileContent = characters.joinToString("\n") { character ->
-            "Name: ${character.name}, Culture: ${character.culture}"
-        }
-
-        val externalStorageDir =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        val file = File(externalStorageDir, fileName)
-
-        try {
-            if (isFileExists()) {
-                Toast.makeText(requireContext(), "Файл уже существует", Toast.LENGTH_SHORT).show()
-            } else {
-                file.writeText(fileContent)
-                Toast.makeText(
-                    requireContext(), "Файл сохранён: ${file.absolutePath}", Toast.LENGTH_SHORT
-                ).show()
-            }
-        } catch (e: Exception) {
-            Toast.makeText(
-                requireContext(),
-                "Ошибка сохранения файла: ${e.localizedMessage}",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-
-    private fun deleteFile() {
-        val externalStorageDir =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        val file = File(externalStorageDir, fileName)
-
-        if (isFileExists()) {
-            file.delete()
-            Toast.makeText(requireContext(), "Файл удалён", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(requireContext(), "Файл не найден", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun isFileExists(): Boolean {
-        val externalStorageDir =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        val file = File(externalStorageDir, fileName)
-        return file.exists()
-    }
-
-    private fun createBackupFile(characters: List<Character>) {
-        val fileContent = characters.joinToString("\n") { character ->
-            "Name: ${character.name}, Culture: ${character.culture}"
-        }
-
-        val backupFile = File(requireContext().filesDir, fileName)
-
-        try {
-            backupFile.writeText(fileContent)
-            Log.d("Backup", "Резервная копия создана: ${backupFile.absolutePath}")
-        } catch (e: Exception) {
-            Log.d("Backup", "Ошибка создания резервной копии: ${e.localizedMessage}")
-        }
-    }
+//    private fun saveHeroesToFile(characters: List<Character>) {
+//        val fileContent = characters.joinToString("\n") { character ->
+//            "Name: ${character.name}, Culture: ${character.culture}"
+//        }
+//
+//        val externalStorageDir =
+//            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+//        val file = File(externalStorageDir, fileName)
+//
+//        try {
+//            if (isFileExists()) {
+//                Toast.makeText(requireContext(), "Файл уже существует", Toast.LENGTH_SHORT).show()
+//            } else {
+//                file.writeText(fileContent)
+//                Toast.makeText(
+//                    requireContext(), "Файл сохранён: ${file.absolutePath}", Toast.LENGTH_SHORT
+//                ).show()
+//            }
+//        } catch (e: Exception) {
+//            Toast.makeText(
+//                requireContext(),
+//                "Ошибка сохранения файла: ${e.localizedMessage}",
+//                Toast.LENGTH_SHORT
+//            ).show()
+//        }
+//    }
+//
+//    private fun deleteFile() {
+//        val externalStorageDir =
+//            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+//        val file = File(externalStorageDir, fileName)
+//
+//        if (isFileExists()) {
+//            file.delete()
+//            Toast.makeText(requireContext(), "Файл удалён", Toast.LENGTH_SHORT).show()
+//        } else {
+//            Toast.makeText(requireContext(), "Файл не найден", Toast.LENGTH_SHORT).show()
+//        }
+//    }
+//
+//    private fun isFileExists(): Boolean {
+//        val externalStorageDir =
+//            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+//        val file = File(externalStorageDir, fileName)
+//        return file.exists()
+//    }
+//
+//    private fun createBackupFile(characters: List<Character>) {
+//        val fileContent = characters.joinToString("\n") { character ->
+//            "Name: ${character.name}, Culture: ${character.culture}"
+//        }
+//
+//        val backupFile = File(requireContext().filesDir, fileName)
+//
+//        try {
+//            backupFile.writeText(fileContent)
+//            Log.d("Backup", "Резервная копия создана: ${backupFile.absolutePath}")
+//        } catch (e: Exception) {
+//            Log.d("Backup", "Ошибка создания резервной копии: ${e.localizedMessage}")
+//        }
+//    }
 
     override fun onDestroyView() {
         super.onDestroyView()
